@@ -258,5 +258,5 @@ npm run production  # или npm run dev для разработки
 
 ## Автор изменений
 
-Custom fork created for YUboost project.
+Custom fork created for YanGusik project.
 Based on `opcodesio/log-viewer` v3.10.2
