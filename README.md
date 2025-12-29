@@ -56,7 +56,9 @@ Log Viewer helps you quickly and clearly see individual log entries, to **search
 
 This fork adds **Ignition-style exception debugging** to enhance error analysis:
 
-![Exception Debugging Screenshot](screenshot.jpg)
+![Exception Debugging Screenshot](https://github.com/user-attachments/assets/0da7b418-4603-4fc0-b7ea-fe70b16333d7)
+![2](https://github.com/user-attachments/assets/1ba46e35-6633-462b-accb-dd8c26976842)
+
 
 ### 🔥 Enhanced Exception Debugging
 
