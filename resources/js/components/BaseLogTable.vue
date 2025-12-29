@@ -79,16 +79,19 @@
           </div>
 
           <tab-container v-if="logViewerStore.isOpen(index)" :tabs="getTabsForLog(log)">
+            <tab-content v-if="log.has_exception" tab-value="exception">
+              <exception-debugger
+                :exception="log.exception"
+                :context-exceptions="log.context_exceptions"
+              />
+            </tab-content>
+
             <tab-content v-if="log.extra && log.extra.mail_preview && log.extra.mail_preview.html" tab-value="mail_html_preview">
               <mail-html-preview :mail="log.extra.mail_preview" />
             </tab-content>
 
             <tab-content v-if="log.extra && log.extra.mail_preview && log.extra.mail_preview.text" tab-value="mail_text_preview">
               <mail-text-preview :mail="log.extra.mail_preview" />
-            </tab-content>
-
-            <tab-content v-if="hasLaravelStackTrace(log)" tab-value="laravel_stack_trace">
-              <LaravelStackTraceDisplay :log="log" />
             </tab-content>
 
             <tab-content tab-value="raw">
@@ -155,7 +158,7 @@ import TabContainer from "./TabContainer.vue";
 import TabContent from "./TabContent.vue";
 import MailHtmlPreview from "./MailHtmlPreview.vue";
 import MailTextPreview from "./MailTextPreview.vue";
-import LaravelStackTraceDisplay from "./LaravelStackTraceDisplay.vue";
+import ExceptionDebugger from "./ExceptionDebugger.vue";
 import {computed} from "vue";
 
 const fileStore = useFileStore();
@@ -184,10 +187,6 @@ const hasContext = (log) => {
 const getExtraTabsForLog = (log) => {
   let tabs = [];
 
-  if (hasLaravelStackTrace(log)) {
-    tabs.push({ name: 'Stack Trace', value: 'laravel_stack_trace' });
-  }
-
   if (! log.extra || ! log.extra.mail_preview) {
     return tabs;
   }
@@ -204,8 +203,17 @@ const getExtraTabsForLog = (log) => {
 }
 
 const getTabsForLog = (log) => {
-  const tabs = [...getExtraTabsForLog(log)];
+  const tabs = [];
 
+  // Exception tab (first if exists)
+  if (log.has_exception) {
+    tabs.push({ name: 'Exception', value: 'exception' });
+  }
+
+  // Mail preview tabs
+  tabs.push(...getExtraTabsForLog(log));
+
+  // Raw tab (always last)
   tabs.push({ name: 'Raw', value: 'raw' });
 
   return tabs.filter(Boolean);
@@ -219,13 +227,6 @@ const prepareContextForOutput = (context) => {
 
     return value;
   }, 2);
-}
-
-const hasLaravelStackTrace = (log) => {
-  const exception = Array.isArray(log.context)
-    ? log.context.find(item => item.exception)?.exception
-    : log.context.exception;
-  return exception && typeof exception === 'string' && exception.includes('[stacktrace]');
 }
 
 const tableColumns = computed(() => {

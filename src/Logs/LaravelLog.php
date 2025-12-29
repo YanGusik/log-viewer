@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Opcodes\LogViewer\Facades\LogViewer;
 use Opcodes\LogViewer\LogLevels\LaravelLogLevel;
 use Opcodes\LogViewer\Utils\Utils;
+use Opcodes\LogViewer\Utils\ExceptionParser;
 use Opcodes\MailParser\Message;
 
 class LaravelLog extends Log
@@ -61,13 +62,26 @@ class LaravelLog extends Log
         $text = $firstLineText.($matches[8] ?? '').implode('', $firstLineSplit)."\n".$theRestOfIt;
 
         if (session()->get('log-viewer:shorter-stack-traces', false)) {
-            // Filter stack traces in text and context.
-            $text = $this->filterStackTrace($text);
-            foreach ($this->context as $key => $value) {
-                if (is_string($value)) {
-                    $this->context[$key] = $this->filterStackTrace($value);
+            $excludes = config('log-viewer.shorter_stack_trace_excludes', []);
+            $emptyLineCharacter = '    ...';
+            $lines = explode("\n", $text);
+            $filteredLines = [];
+            foreach ($lines as $line) {
+                $shouldExclude = false;
+                foreach ($excludes as $excludePattern) {
+                    if (str_starts_with($line, '#') && str_contains($line, $excludePattern)) {
+                        $shouldExclude = true;
+                        break;
+                    }
+                }
+
+                if ($shouldExclude && end($filteredLines) !== $emptyLineCharacter) {
+                    $filteredLines[] = $emptyLineCharacter;
+                } elseif (! $shouldExclude) {
+                    $filteredLines[] = $line;
                 }
             }
+            $text = implode("\n", $filteredLines);
         }
 
         if (strlen($text) > LogViewer::maxLogSize()) {
@@ -77,6 +91,7 @@ class LaravelLog extends Log
 
         $this->text = trim($text);
         $this->extractMailPreview();
+        $this->extractExceptionData();
     }
 
     protected function fillMatches(array $matches = []): void
@@ -108,8 +123,8 @@ class LaravelLog extends Log
             $json_data = json_decode(trim($json_string), true);
 
             if (json_last_error() == JSON_ERROR_CTRL_CHAR) {
-                // might need to escape new lines and carriage returns
-                $json_data = json_decode(str_replace(["\r\n", "\r", "\n"], ['\\n', '\\n', '\\n'], $json_string), true);
+                // might need to escape new lines
+                $json_data = json_decode(str_replace("\n", '\\n', $json_string), true);
             }
 
             if (json_last_error() == JSON_ERROR_NONE) {
@@ -167,6 +182,35 @@ class LaravelLog extends Log
         ];
     }
 
+    protected function extractExceptionData(): void
+    {
+        // Проверяем включен ли exception debugging
+        if (!config('log-viewer.exception_debugging.enabled', true)) {
+            return;
+        }
+
+        // Парсим exception из текста лога
+        $exceptionData = ExceptionParser::parseFromText($this->text);
+
+        if ($exceptionData) {
+            // Удаляем previous exception если парсинг отключен в конфиге
+            if (!config('log-viewer.exception_debugging.parse_previous_exceptions', true)) {
+                unset($exceptionData['previous']);
+            }
+
+            $this->extra['exception'] = $exceptionData;
+        }
+
+        // Также извлекаем exceptions из context (если есть Throwable объекты)
+        $contextExceptions = ExceptionParser::extractExceptions($this->context);
+
+        if (!empty($contextExceptions)) {
+            $this->extra['context_exceptions'] = $contextExceptions;
+            // Удаляем Throwable из context для чистого отображения
+            $this->context = ExceptionParser::removeExceptionsFromContext($this->context);
+        }
+    }
+
     protected function getJsonStringsFromFullText(): array
     {
         $json = '';
@@ -189,34 +233,5 @@ class LaravelLog extends Log
         }
 
         return $json_strings;
-    }
-
-    protected function filterStackTrace(string $text): string
-    {
-        // Normalize line endings for cross-platform compatibility
-        $text = str_replace("\r\n", "\n", $text);
-        $text = str_replace("\r", "\n", $text);
-
-        $lines = explode("\n", $text);
-        $filteredLines = [];
-        $emptyLineCharacter = '    ...';
-        $excludes = config('log-viewer.shorter_stack_trace_excludes', []);
-        foreach ($lines as $line) {
-            $shouldExclude = false;
-            foreach ($excludes as $excludePattern) {
-                if (str_starts_with($line, '#') && str_contains($line, $excludePattern)) {
-                    $shouldExclude = true;
-                    break;
-                }
-            }
-
-            if ($shouldExclude && end($filteredLines) !== $emptyLineCharacter) {
-                $filteredLines[] = $emptyLineCharacter;
-            } elseif (! $shouldExclude) {
-                $filteredLines[] = $line;
-            }
-        }
-
-        return implode("\n", $filteredLines);
     }
 }

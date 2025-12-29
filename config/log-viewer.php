@@ -1,9 +1,5 @@
 <?php
 
-use Opcodes\LogViewer\Enums\SortingMethod;
-use Opcodes\LogViewer\Enums\SortingOrder;
-use Opcodes\LogViewer\Enums\Theme;
-
 return [
 
     /*
@@ -43,16 +39,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Log Viewer Assets Path
-    |--------------------------------------------------------------------------
-    | The path to the Log Viewer assets.
-    |
-    */
-
-    'assets_path' => 'vendor/log-viewer',
-
-    /*
-    |--------------------------------------------------------------------------
     | Back to system URL
     |--------------------------------------------------------------------------
     | When set, displays a link to easily get back to this URL.
@@ -76,16 +62,6 @@ return [
     */
 
     'timezone' => null,
-
-    /*
-    |--------------------------------------------------------------------------
-    | Log Viewer datetime format.
-    |--------------------------------------------------------------------------
-    | The format used to display timestamps in the UI.
-    |
-    */
-
-    'datetime_format' => 'Y-m-d H:i:s',
 
     /*
     |--------------------------------------------------------------------------
@@ -138,7 +114,6 @@ return [
         //         'username' => 'username',
         //         'password' => 'password',
         //     ],
-        //     'verify_server_certificate' => true,
         // ],
         //
         // 'production' => [
@@ -150,7 +125,6 @@ return [
         //     'headers' => [
         //         'X-Foo' => 'Bar',
         //     ],
-        //     'verify_server_certificate' => true,
         // ],
     ],
 
@@ -166,9 +140,8 @@ return [
         '**/*.log',
 
         // You can include paths to other log types as well, such as apache, nginx, and more.
-        // This key => value pair can be used to rename and group multiple paths into one folder in the UI.
-        '/var/log/httpd/*' => 'Apache',
-        '/var/log/nginx/*' => 'Nginx',
+        '/var/log/httpd/*',
+        '/var/log/nginx/*',
 
         // MacOS Apple Silicon logs
         '/opt/homebrew/var/log/nginx/*',
@@ -258,75 +231,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Per page options
+    | Exception Debugging (Ignition-style)
     |--------------------------------------------------------------------------
-    | Define the available options for number of results per page
+    | Settings for enhanced exception debugging with code snippets.
     |
     */
 
-    'per_page_options' => [10, 25, 50, 100, 250, 500],
+    'exception_debugging' => [
+        // Enable exception parsing and code snippets
+        'enabled' => env('LOG_VIEWER_EXCEPTION_DEBUGGING', true),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Default settings for Log Viewer
-    |--------------------------------------------------------------------------
-    | These settings determine the default behaviour of Log Viewer. Many of
-    | these can be persisted for the user in their browser's localStorage,
-    | if the `use_local_storage` option is set to true.
-    |
-    */
+        // Number of lines to show around error line in code snippet
+        'snippet_lines_around' => 10,
 
-    'defaults' => [
+        // Show code snippets for vendor frames
+        'show_vendor_snippets' => false,
 
-        // Whether to use browser's localStorage to store user preferences.
-        // If true, user preferences saved in the browser will take precedence over the defaults below.
-        'use_local_storage' => true,
-
-        // Method to sort the folders. Other options: `Alphabetical`, `ModifiedTime`
-        'folder_sorting_method' => SortingMethod::ModifiedTime,
-
-        // Order to sort the folders. Other options: `Ascending`, `Descending`
-        'folder_sorting_order' => SortingOrder::Descending,
-
-        // Method for sorting log-files into directories. Other options: `Alphabetical`, `ModifiedTime`
-        'file_sorting_method' => SortingMethod::ModifiedTime,
-
-        // Order to sort the logs. Other options: `Ascending`, `Descending`
-        'log_sorting_order' => SortingOrder::Descending,
-
-        // Number of results per page. Must be one of the above `per_page_options` values
-        'per_page' => 25,
-
-        // Color scheme for the Log Viewer. Other options: `System`, `Light`, `Dark`
-        'theme' => Theme::System,
-
-        // Whether to enable `Shorter Stack Traces` option by default
-        'shorter_stack_traces' => false,
-
+        // Parse previous/nested exceptions
+        'parse_previous_exceptions' => true,
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Exclude IP from identifiers
-    |--------------------------------------------------------------------------
-    | By default, file and folder identifiers include the server's IP address
-    | to ensure uniqueness. In load-balanced environments with shared storage,
-    | this can cause "No results" errors. Set to true to exclude IP addresses
-    | from identifier generation for consistent results across servers.
-    |
-    */
-
-    'exclude_ip_from_identifiers' => env('LOG_VIEWER_EXCLUDE_IP_FROM_IDENTIFIERS', false),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Root folder prefix
-    |--------------------------------------------------------------------------
-    | The prefix for log files inside Laravel's `storage/logs` folder.
-    | Log Viewer does not show the full path to these files in the UI,
-    | but only the filename prefixed with this value.
-    |
-    */
-
-    'root_folder_prefix' => 'root',
 ];
