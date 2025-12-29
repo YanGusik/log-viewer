@@ -7,6 +7,7 @@
 <p align="center">
     <a href="https://log-viewer.opcodes.io/">Documentation</a> |
     <a href="#features">Features</a> |
+    <a href="#custom-fork-features">Custom Fork Features</a> |
     <a href="#installation">Installation</a> |
     <a href="#troubleshooting">Troubleshooting</a> |
     <a href="#credits">Credits</a>
@@ -18,6 +19,10 @@
 <a href="https://packagist.org/packages/opcodesio/log-viewer"><img src="https://img.shields.io/packagist/php-v/opcodesio/log-viewer.svg?style=flat-square" alt="PHP from Packagist"></a>
 <a href="https://packagist.org/packages/opcodesio/log-viewer"><img src="https://img.shields.io/badge/Laravel-8.x,%209.x,%2010.x,%2011.x,%2012.x-brightgreen.svg?style=flat-square" alt="Laravel Version"></a>
 </p>
+
+> **Note**: This is a custom fork of [opcodesio/log-viewer](https://github.com/opcodesio/log-viewer) with enhanced exception debugging features.
+>
+> 👤 **Fork maintained by**: [Yan Gusik](https://github.com/YanGusik)
 
 ![log-viewer-light-dark](https://user-images.githubusercontent.com/8697942/186705175-d51db6ef-1615-4f94-aa1e-3ecbcb29ea24.png)
 
@@ -47,6 +52,24 @@ Log Viewer helps you quickly and clearly see individual log entries, to **search
 - 💌 **Mail previews** for e-mails sent to the logs,
 - and more...
 
+## Custom Fork Features
+
+This fork adds **Ignition-style exception debugging** to enhance error analysis:
+
+![Exception Debugging Screenshot](screenshot.jpg)
+
+### 🔥 Enhanced Exception Debugging
+
+- **📝 Code Snippets** - View the exact line where the exception occurred with surrounding code context
+- **🎨 Syntax Highlighting** - PHP syntax highlighting using highlight.js for better code readability
+- **📚 Detailed Stack Trace** - Interactive stacktrace with code snippets for each frame
+- **🔗 Nested Exceptions** - Full support for previous/nested exceptions with complete details
+- **📦 Vendor/App Separation** - Clearly distinguish between your application code and vendor packages
+- **⚙️ Configurable** - Customize snippet line count and vendor code display
+- **🌙 Dark Mode** - Beautiful dark theme support for all debugging features
+
+For detailed documentation about custom features, see [CUSTOM_FEATURES.md](CUSTOM_FEATURES.md).
+
 ### Documentation
 
 Documentation can be found on the [official website](https://log-viewer.opcodes.io/).
@@ -60,7 +83,39 @@ Documentation can be found on the [official website](https://log-viewer.opcodes.
 
 ### Installation
 
-To install the package via composer, Run:
+#### Installing This Fork
+
+To install this fork with enhanced exception debugging features, add the following to your `composer.json`:
+
+```json
+{
+  "repositories": {
+    "log-viewer": {
+      "type": "vcs",
+      "url": "https://github.com/YanGusik/log-viewer"
+    }
+  },
+  "require": {
+    "opcodesio/log-viewer": "dev-feature/ignition-style-exception-debugging"
+  }
+}
+```
+
+Then run:
+
+```bash
+composer update opcodesio/log-viewer
+```
+
+After installing the package, publish the front-end assets by running:
+
+```bash
+php artisan log-viewer:publish
+```
+
+#### Installing Original Package
+
+To install the original package via composer, Run:
 
 ```bash
 composer require opcodesio/log-viewer
@@ -118,8 +173,14 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 ## Credits
 
+### Original Package
+
 - [Arunas Skirius](https://github.com/arukompas)
 - [All Contributors](../../contributors)
+
+### Fork Author
+
+- **[Yan Gusik](https://github.com/YanGusik)** - Exception debugging enhancements
 
 ## License
 
