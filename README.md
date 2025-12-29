@@ -98,7 +98,7 @@ To install this fork with enhanced exception debugging features, add the followi
     }
   },
   "require": {
-    "opcodesio/log-viewer": "dev-feature/ignition-style-exception-debugging"
+    "opcodesio/log-viewer": "dev-main",
   }
 }
 ```
